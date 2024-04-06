@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Pusher from "pusher-js";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import PageLayout from "~/components/PageLayout";
 import QuizooLogo from "~/components/QuizooLogo";
@@ -62,7 +62,9 @@ export default function Home() {
       <PageLayout className="justify-center" isPusherActive={pusher !== null}>
         <QuizooLogo />
         <h1 className="text-primary-content">Quizoo</h1>
-        <RoomIdInput handleSubmit={handleSubmit} />
+        <Suspense>
+          <RoomIdInput handleSubmit={handleSubmit} />
+        </Suspense>
       </PageLayout>
     );
   }

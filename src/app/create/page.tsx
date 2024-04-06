@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { FaArrowRightToBracket } from "react-icons/fa6";
 import PageLayout from "~/components/PageLayout";
 import { Button } from "~/components/ui/button";
@@ -84,12 +84,14 @@ export default function Create() {
 
   if (!pusher) {
     return (
-      <PageLayout>
-        <div>
-          We were unable to connect to Pusher. Please refresh the page and try
-          again :(
-        </div>
-      </PageLayout>
+      <Suspense>
+        <PageLayout>
+          <div>
+            We were unable to connect to Pusher. Please refresh the page and try
+            again :(
+          </div>
+        </PageLayout>
+      </Suspense>
     );
   }
 
@@ -99,37 +101,44 @@ export default function Create() {
   };
 
   return (
-    <PageLayout isPusherActive={pusher !== null}>
-      <h1 className="text-primary-content">Create Game</h1>
-      {!channel && (
-        <Button
-          type="submit"
-          className="flex w-full max-w-sm justify-items-center gap-2 align-middle text-white"
-          variant="animatedGradient"
-          onClick={handleCreate}
-        >
-          Create Game
-          <FaArrowRightToBracket />
-        </Button>
-      )}
-      {channel && gameId && (
-        <div className="flex items-center justify-center gap-2">
-          <p>Game ID: {gameId}</p>
-          <Indicator variant={isOnline ? "online" : "offline"} />
+    <Suspense>
+      <PageLayout isPusherActive={pusher !== null}>
+        <div className="flex items-center justify-center gap-2 align-middle">
+          <h1 className="m-0 text-primary-content">
+            {gameId ? `#${gameId}` : "Create Game"}
+          </h1>
+          {gameId && <Indicator variant={isOnline ? "online" : "offline"} />}
         </div>
-      )}
+        {!channel && (
+          <Button
+            type="submit"
+            className="my-4 flex w-full max-w-sm justify-items-center gap-2 align-middle text-white"
+            variant="animatedGradient"
+            onClick={handleCreate}
+          >
+            Create Game
+            <FaArrowRightToBracket />
+          </Button>
+        )}
 
-      {/* Player Count */}
-      <div className="flex items-center justify-center gap-4">
-        <p>Players in Game: {playerCount}</p>
-        <Button
-          onClick={() => {
-            getPlayerCount();
-          }}
-        >
-          <IoReload />
-        </Button>
-      </div>
-    </PageLayout>
+        {/* Player Count */}
+        <div className="flex items-center justify-center gap-4">
+          {channelInfoMutation.isPending ? (
+            <p>Reloading Player Count...</p>
+          ) : (
+            <>
+              <p>Players in Game: {playerCount}</p>
+              <Button
+                onClick={() => {
+                  getPlayerCount();
+                }}
+              >
+                <IoReload />
+              </Button>
+            </>
+          )}
+        </div>
+      </PageLayout>
+    </Suspense>
   );
 }
