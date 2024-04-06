@@ -39,8 +39,14 @@ export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
 
   useEffect(() => {
     form.setValue("roomId", roomId ?? "");
-    
   }, [roomId, form]);
+
+  useEffect(() => {
+    const existingUsername = localStorage.getItem("username");
+    if (existingUsername) {
+      form.setValue("username", existingUsername);
+    }
+  }, []);
 
   return (
     <Form {...form}>
