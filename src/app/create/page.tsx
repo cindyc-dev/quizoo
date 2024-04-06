@@ -9,91 +9,75 @@ import { generateGamePin } from "~/utils/gamePin";
 import Pusher from "pusher-js";
 import type * as PusherTypes from "pusher-js";
 import { toast } from "sonner";
-import { type PlayerJoinedEvent } from "~/types/pusherEvents";
 import { useRouter, useSearchParams } from "next/navigation";
-
-const initialGameState: GameState = {
-  gameId: "",
-};
-
-interface GameState {
-  gameId: string;
-}
+import { getPusherEnvVars } from "~/utils/pusherClient";
+import { api } from "~/trpc/react";
+import { IoReload } from "react-icons/io5";
 
 export default function Create() {
   const query = useSearchParams();
   const router = useRouter();
-
   const gameId = query.get("gameId");
 
   const [isOnline, setIsOnline] = useState(false);
 
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [channel, setChannel] = useState<PusherTypes.Channel | null>(null);
-  const [players, setPlayers] = useState<PlayerJoinedEvent[]>([]);
-
-  // const [gameState, setGameState] = useState<GameState | null>({
-  //   gameId: gameId ?? "",
-  // });
-  // useEffect(() => {
-  //   const storedData = localStorage.getItem("gameState");
-  //   console.log({ storedData });
-  //   if (storedData) {
-  //     setGameState(JSON.parse(storedData) as GameState);
-  //   } else {
-  //     setGameState(initialGameState);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   if (
-  //     JSON.stringify(gameState) !== JSON.stringify(initialGameState) &&
-  //     gameState !== null
-  //   ) {
-  //     localStorage.setItem("gameState", JSON.stringify(gameState));
-  //   }
-  // }, [gameState]);
+  const [playerCount, setPlayerCount] = useState<number>(0);
 
   useEffect(() => {
-    if (
-      !process.env.NEXT_PUBLIC_PUSHER_APP_KEY ||
-      !process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER
-    ) {
-      console.error("ERROR:");
-      toast.error("Failed at creating Pusher instance.");
-      return;
-    }
-    const initializedPusher = new Pusher(
-      process.env.NEXT_PUBLIC_PUSHER_APP_KEY,
-      {
-        cluster: process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER,
-      },
-    );
+    // Initialise Client Pusher
+    const { appKey, appCluster } = getPusherEnvVars();
+    const initializedPusher = new Pusher(appKey, {
+      cluster: appCluster,
+    });
     Pusher.logToConsole = true;
-
     setPusher(initializedPusher);
 
     return () => {
+      // Clean Up Pusher instance when component unmounts
       if (initializedPusher) {
+        initializedPusher.unbind_all();
         initializedPusher.disconnect();
       }
     };
   }, []);
 
+  const channelInfoMutation = api.sockets.getChannelInfo.useMutation();
+  const getPlayerCount = () => {
+    if (gameId) {
+      channelInfoMutation.mutate(
+        { gameId },
+        {
+          onSuccess: (data) => {
+            if (data) {
+              const { subscription_count } = data;
+              setPlayerCount(subscription_count);
+            }
+          },
+          onError: (error) => {
+            console.error(error);
+            toast.error(`Error while fetching number of players in game.`);
+          },
+        },
+      );
+    }
+  };
+
+  // Fetch Channel Info
+  useEffect(() => {
+    getPlayerCount();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Subscribe to GameId
   useEffect(() => {
     if (pusher && gameId) {
       const channel = pusher.subscribe(gameId);
       setChannel(channel);
-
       channel.bind("pusher:subscription_succeeded", () => {
-        console.log("Successfully Connected to game");
         setIsOnline(true);
         toast.success(`Successfully created and connected to ${gameId}`);
-      });
-
-      channel.bind("player-joined", (data: PlayerJoinedEvent) => {
-        console.log(`Player ${data.username} has joined`);
-        setPlayers((oldState) => [...oldState, data]);
       });
     }
   }, [gameId, pusher]);
@@ -134,7 +118,18 @@ export default function Create() {
           <Indicator variant={isOnline ? "online" : "offline"} />
         </div>
       )}
-      {JSON.stringify(players)}
+
+      {/* Player Count */}
+      <div className="flex items-center justify-center gap-4">
+        <p>Players in Game: {playerCount}</p>
+        <Button
+          onClick={() => {
+            getPlayerCount();
+          }}
+        >
+          <IoReload />
+        </Button>
+      </div>
     </PageLayout>
   );
 }

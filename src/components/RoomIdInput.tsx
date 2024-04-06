@@ -28,20 +28,19 @@ interface RoomIdInputInterface {
 export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
   const query = useSearchParams();
   const roomId = query.get("roomId");
-  const username = query.get("username");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       roomId: roomId ?? "",
-      username: username ?? "",
+      username: "",
     },
   });
 
   useEffect(() => {
     form.setValue("roomId", roomId ?? "");
-    form.setValue("username", username ?? "");
-  }, [roomId, form, username]);
+    
+  }, [roomId, form]);
 
   return (
     <Form {...form}>
