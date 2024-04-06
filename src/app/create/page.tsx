@@ -100,7 +100,7 @@ export default function Create() {
 
     channel.bind("player-joined", (data: PlayerJoinedEvent) => {
       console.log(`Player ${data.username} has joined`);
-      players.push(data);
+      setPlayers((oldState) => [...oldState, data]);
     });
   };
 

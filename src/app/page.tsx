@@ -7,7 +7,7 @@ import PageLayout from "~/components/PageLayout";
 import QuizooLogo from "~/components/QuizooLogo";
 import RoomIdInput from "~/components/RoomIdInput";
 import { handleJoin } from "~/components/handleJoin";
-import { api } from "~/trpc/server";
+import { api } from "~/trpc/react";
 import { type PlayerJoinedEvent } from "~/types/pusherEvents";
 
 export default function Home() {
@@ -38,6 +38,7 @@ export default function Home() {
       }
     };
   }, []);
+  const joinMutation = api.sockets.join.useMutation();
 
   if (!pusher) {
     return;
@@ -51,18 +52,10 @@ export default function Home() {
         handleSubmit={async ({ roomId, username }) => {
           const channel = pusher.subscribe(roomId);
           channel.bind("pusher:subscription_succeeded", async () => {
-            await handleJoin(roomId, username, pusher)
-              .then((isSuccess) => {
-                if (isSuccess) {
-                  toast.success(`Successfully joined ${roomId} as ${username}`);
-                } else {
-                  toast.error(`Failed to join ${roomId} as ${username}`);
-                }
-              })
-              .catch((err) => {
-                toast.error(`Failed to join ${roomId} as ${username}`);
-                console.error(err);
-              });
+            joinMutation.mutate({
+              username,
+              roomId,
+            });
           });
         }}
       />
