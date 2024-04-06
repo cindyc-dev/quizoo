@@ -27,17 +27,16 @@ interface RoomIdInputInterface {
 
 export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
   const query = useSearchParams();
+  const roomId = query.get("roomId");
+  const username = query.get("username");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      roomId: query.get("roomId") ?? "",
-      username: query.get("username") ?? "",
+      roomId: roomId ?? "",
+      username: username ?? "",
     },
   });
-
-  const { formState } = form;
-  const roomId = query.get("roomId");
-  const username = query.get("username");
 
   useEffect(() => {
     form.setValue("roomId", roomId ?? "");
@@ -74,7 +73,7 @@ export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
           type="submit"
           className="flex w-full justify-items-center gap-2 align-middle text-white"
           variant="animatedGradient"
-          disabled={!formState.isValid}
+          disabled={!form.formState.isValid}
         >
           Join
           <FaArrowRightToBracket />

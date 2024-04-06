@@ -10,6 +10,7 @@ import Pusher from "pusher-js";
 import type * as PusherTypes from "pusher-js";
 import { toast } from "sonner";
 import { type PlayerJoinedEvent } from "~/types/pusherEvents";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const initialGameState: GameState = {
   gameId: "",
@@ -20,31 +21,38 @@ interface GameState {
 }
 
 export default function Create() {
-  const [gameState, setGameState] = useState<GameState | null>(null);
+  const query = useSearchParams();
+  const router = useRouter();
+
+  const gameId = query.get("gameId");
+
   const [isOnline, setIsOnline] = useState(false);
 
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [channel, setChannel] = useState<PusherTypes.Channel | null>(null);
   const [players, setPlayers] = useState<PlayerJoinedEvent[]>([]);
 
-  useEffect(() => {
-    const storedData = localStorage.getItem("gameState");
-    console.log({ storedData });
-    if (storedData) {
-      setGameState(JSON.parse(storedData) as GameState);
-    } else {
-      setGameState(initialGameState);
-    }
-  }, []);
+  // const [gameState, setGameState] = useState<GameState | null>({
+  //   gameId: gameId ?? "",
+  // });
+  // useEffect(() => {
+  //   const storedData = localStorage.getItem("gameState");
+  //   console.log({ storedData });
+  //   if (storedData) {
+  //     setGameState(JSON.parse(storedData) as GameState);
+  //   } else {
+  //     setGameState(initialGameState);
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    if (
-      JSON.stringify(gameState) !== JSON.stringify(initialGameState) &&
-      gameState !== null
-    ) {
-      localStorage.setItem("gameState", JSON.stringify(gameState));
-    }
-  }, [gameState]);
+  // useEffect(() => {
+  //   if (
+  //     JSON.stringify(gameState) !== JSON.stringify(initialGameState) &&
+  //     gameState !== null
+  //   ) {
+  //     localStorage.setItem("gameState", JSON.stringify(gameState));
+  //   }
+  // }, [gameState]);
 
   useEffect(() => {
     if (
@@ -72,6 +80,24 @@ export default function Create() {
     };
   }, []);
 
+  useEffect(() => {
+    if (pusher && gameId) {
+      const channel = pusher.subscribe(gameId);
+      setChannel(channel);
+
+      channel.bind("pusher:subscription_succeeded", () => {
+        console.log("Successfully Connected to game");
+        setIsOnline(true);
+        toast.success(`Successfully created and connected to ${gameId}`);
+      });
+
+      channel.bind("player-joined", (data: PlayerJoinedEvent) => {
+        console.log(`Player ${data.username} has joined`);
+        setPlayers((oldState) => [...oldState, data]);
+      });
+    }
+  }, [gameId, pusher]);
+
   if (!pusher) {
     return (
       <PageLayout>
@@ -85,26 +111,8 @@ export default function Create() {
 
   const handleCreate = () => {
     const newGameId = generateGamePin();
-    setGameState({
-      gameId: newGameId,
-    });
-
-    const channel = pusher.subscribe(newGameId);
-    setChannel(channel);
-
-    channel.bind("pusher:subscription_succeeded", () => {
-      console.log("Successfully Connected to game");
-      setIsOnline(true);
-      toast.success(`Successfully created and connected to ${newGameId}`);
-    });
-
-    channel.bind("player-joined", (data: PlayerJoinedEvent) => {
-      console.log(`Player ${data.username} has joined`);
-      setPlayers((oldState) => [...oldState, data]);
-    });
+    router.push(`create?gameId=${newGameId}`);
   };
-
-  // console.log(pusher);
 
   return (
     <PageLayout isPusherActive={pusher !== null}>
@@ -120,9 +128,9 @@ export default function Create() {
           <FaArrowRightToBracket />
         </Button>
       )}
-      {channel && gameState?.gameId && (
+      {channel && gameId && (
         <div className="flex items-center justify-center gap-2">
-          <p>Game ID: {gameState.gameId}</p>
+          <p>Game ID: {gameId}</p>
           <Indicator variant={isOnline ? "online" : "offline"} />
         </div>
       )}
