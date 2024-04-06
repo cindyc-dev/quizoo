@@ -12,19 +12,27 @@
   - [ ] #later Rejoin/Kill existing Game
   - [x] View Currently Joined Players
     - [ ] 
-  - [ ] Reload Joined Players
-    - [ ] HTTP Post Request
+  - [x] Reload Joined Players
+    - [x] HTTP Post Request
     - [ ] #later Automatically Reload every X minutes/seconds
-  - [ ] Toggle between using HTTP and socket joining
+  - [ ] ~~Toggle between using HTTP and socket joining~~
   - [ ] #later use database to track player names
   - [ ] #way-later Authentication
   - [ ] #later Automatically Copy the Game ID
   - [ ] #later figure out
 - [x] Player Join Channel
-- [ ] Create Card
-- [ ] Edit Card
-- [ ] Delete Card
-- [ ] Start Game
+- [ ] #security Multiple Hosts Error
+  - using pusher
+    - join event triggered by client host and listened by client hosts - if another host is detected, send request to server to kick duplicate host (popup shown on other host's screen to close original tab)
+  - using database and auth tokens
+  - [ ] join event listened by other hosts
+- [ ] #security Too Many Players Error
+  - [ ] using Pusher's HTTP API
+- [ ] Cards
+  - [ ] Create Card
+  - [ ] Edit Card
+  - [ ] Delete Card
+  - [ ] Start Game
   - [ ] Waiting Screen
 - [ ] Show Card to Players
 - [ ] Presentation Controls
