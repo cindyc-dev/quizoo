@@ -6,9 +6,7 @@ import { toast } from "sonner";
 import PageLayout from "~/components/PageLayout";
 import QuizooLogo from "~/components/QuizooLogo";
 import RoomIdInput from "~/components/RoomIdInput";
-import { handleJoin } from "~/components/handleJoin";
 import { api } from "~/trpc/react";
-import { type PlayerJoinedEvent } from "~/types/pusherEvents";
 
 export default function Home() {
   const [pusher, setPusher] = useState<Pusher | null>(null);

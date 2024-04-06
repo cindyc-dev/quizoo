@@ -9,9 +9,9 @@ import { generateGamePin } from "~/utils/gamePin";
 import Pusher from "pusher-js";
 import type * as PusherTypes from "pusher-js";
 import { toast } from "sonner";
-import { PlayerJoinedEvent } from "~/types/pusherEvents";
+import { type PlayerJoinedEvent } from "~/types/pusherEvents";
 
-export const initialGameState: GameState = {
+const initialGameState: GameState = {
   gameId: "",
 };
 
