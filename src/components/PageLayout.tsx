@@ -1,17 +1,20 @@
 import React, { type ReactNode } from "react";
 import Footer from "./Footer";
 import { cn } from "~/lib/utils";
+import { Toaster } from "./ui/sonner";
 
 interface PageLayoutProps {
   children: ReactNode;
   className?: string;
   props?: object;
+  isPusherActive?: boolean;
 }
 
 export default function PageLayout({
   children,
   className,
   props,
+  isPusherActive=false,
 }: PageLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-[#191733] to-[#03020D]">
@@ -24,7 +27,8 @@ export default function PageLayout({
       >
         {children}
       </div>
-      <Footer />
+      <Toaster />
+      <Footer isPusherActive={isPusherActive} />
     </div>
   );
 }

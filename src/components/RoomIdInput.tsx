@@ -12,17 +12,17 @@ import { Input } from "~/components/ui/input";
 
 const formSchema = z.object({
   roomId: z
-    .string({
-      required_error: "Room ID is required",
-    })
+    .string()
     .length(6, {
       message: "The Room ID should have 6 characters",
-    }),
+    })
+    .min(1),
+  username: z.string().min(1),
 });
 
 interface RoomIdInputInterface {
   handleSubmit: (values: z.infer<typeof formSchema>) => void;
-  buttonText: string;
+  buttonText?: string;
 }
 
 export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
@@ -31,19 +31,33 @@ export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       roomId: query.get("roomId") ?? "",
+      username: query.get("username") ?? "",
     },
   });
 
   const { formState } = form;
   const roomId = query.get("roomId");
+  const username = query.get("username");
 
   useEffect(() => {
     form.setValue("roomId", roomId ?? "");
-  }, [roomId, form]);
+    form.setValue("username", username ?? "");
+  }, [roomId, form, username]);
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2">
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input placeholder="😇 Username" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="roomId"

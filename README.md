@@ -11,6 +11,7 @@
 * [ ] Setup Pusher
 * [ ] Host Create Channel
   * [ ] Generate Game ID
+  * [ ] #later Rejoin/Kill existing Game
   * [ ] View Currently Joined Players
   * [ ] Reload Joined Players
     * [ ] #later Automatically Reload every X minutes/seconds
