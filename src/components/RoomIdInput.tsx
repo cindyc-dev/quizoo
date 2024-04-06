@@ -2,11 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import { FaArrowRightToBracket } from "react-icons/fa6";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
@@ -21,10 +20,13 @@ const formSchema = z.object({
     }),
 });
 
-export default function RoomIdInput() {
-  const router = useRouter();
-  const query = useSearchParams();
+interface RoomIdInputInterface {
+  handleSubmit: (values: z.infer<typeof formSchema>) => void;
+  buttonText: string;
+}
 
+export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
+  const query = useSearchParams();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -32,24 +34,16 @@ export default function RoomIdInput() {
     },
   });
 
+  const { formState } = form;
   const roomId = query.get("roomId");
 
   useEffect(() => {
     form.setValue("roomId", roomId ?? "");
   }, [roomId, form]);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    if (values.roomId) {
-      void router.push(`/join?roomId=${values.roomId}`);
-    } else {
-      void router.push("/join");
-    }
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2">
         <FormField
           control={form.control}
           name="roomId"
@@ -61,8 +55,15 @@ export default function RoomIdInput() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+
+        <Button
+          type="submit"
+          className="flex w-full justify-items-center gap-2 align-middle text-white"
+          variant="animatedGradient"
+          disabled={!formState.isValid}
+        >
           Join
+          <FaArrowRightToBracket />
         </Button>
       </form>
     </Form>

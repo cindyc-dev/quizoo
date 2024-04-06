@@ -10,8 +10,13 @@
 ### Phase 1 - Basic Functionality and Deployment
 * [ ] Setup Pusher
 * [ ] Host Create Channel
+  * [ ] Generate Game ID
+  * [ ] View Currently Joined Players
+  * [ ] Reload Joined Players
+    * [ ] #later Automatically Reload every X minutes/seconds
+  * [ ] #later Automatically Copy the Game ID
 * [ ] Player Join Channel
-  * Notifies Host
+  * [ ] 
 * 
 
 ## Counting Messages

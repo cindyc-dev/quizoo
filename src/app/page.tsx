@@ -1,14 +1,15 @@
+import PageLayout from "~/components/PageLayout";
 import QuizooLogo from "~/components/QuizooLogo";
 import RoomIdInput from "~/components/RoomIdInput";
 
 export default async function Home() {
+  const handleJoin = async () => {};
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#191733] to-[#03020D] text-white">
-      <div className="container prose flex flex-col items-center justify-center px-4 py-16">
-        <QuizooLogo />
-        <h1 className="text-white">Quizoo</h1>
-        <RoomIdInput />
-      </div>
-    </main>
+    <PageLayout className="justify-center">
+      <QuizooLogo />
+      <h1 className="text-primary-content">Quizoo</h1>
+      <RoomIdInput handleSubmit={handleJoin} />
+    </PageLayout>
   );
 }
