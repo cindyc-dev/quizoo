@@ -1,6 +1,6 @@
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
-import { type PlayerJoinedEvent } from "~/types/pusherEvents";
+import { type PlayerJoinLeaveEvent as PlayerJoinLeftEvent } from "~/types/pusherEvents";
 import { pusherServer } from "~/utils/pusherServer";
 import axios from "axios";
 import { env } from "~/env";
@@ -12,7 +12,7 @@ interface PusherChannelInfoResponse {
 }
 
 export const socketsRouter = createTRPCRouter({
-  join: publicProcedure
+  playerJoin: publicProcedure
     .input(
       z.object({
         username: z.string().min(1),
@@ -22,12 +22,30 @@ export const socketsRouter = createTRPCRouter({
     .mutation((opts) => {
       const { username, gameId } = opts.input;
 
-      const joinEvent: PlayerJoinedEvent = {
+      const joinEvent: PlayerJoinLeftEvent = {
         username,
         time: new Date(),
       };
 
+      // TODO check if channel is active
+
+      // TODO change this to use database instead and prevent username clashes
       return pusherServer.trigger(gameId, "player-joined", joinEvent);
+    }),
+  playerLeave: publicProcedure
+    .input(
+      z.object({
+        username: z.string().min(1),
+        gameId: z.string().min(1),
+      }),
+    )
+    .mutation((opts) => {
+      const { username, gameId } = opts.input;
+      const leftEvent: PlayerJoinLeftEvent = {
+        username,
+        time: new Date(),
+      };
+      return pusherServer.trigger(gameId, "player-left", leftEvent);
     }),
   getChannelInfo: publicProcedure
     .input(
