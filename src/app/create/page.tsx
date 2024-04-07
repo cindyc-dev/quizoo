@@ -16,6 +16,8 @@ import { api } from "~/trpc/react";
 import { IoReload } from "react-icons/io5";
 import { DataTable } from "./data-table";
 import { cards } from "./columns";
+import { type PlayerJoinLeaveEvent } from "~/types/pusherEvents";
+import { Badge } from "~/components/ui/badge";
 
 export default function Create() {
   const query = useSearchParams();
@@ -27,6 +29,7 @@ export default function Create() {
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [channel, setChannel] = useState<PusherTypes.Channel | null>(null);
   const [playerCount, setPlayerCount] = useState<number>(0);
+  const [players, setPlayers] = useState<string[]>([]);
 
   useEffect(() => {
     // Initialise Client Pusher
@@ -82,6 +85,17 @@ export default function Create() {
         setIsOnline(true);
         toast.success(`Successfully created and connected to ${gameId}`);
       });
+
+      channel.bind("player-joined", (data: PlayerJoinLeaveEvent) => {
+        setPlayers((oldState) => [...oldState, data.username]);
+        toast(`Player ${data.username} has joined`);
+      });
+
+      channel.bind("player-left", (data: PlayerJoinLeaveEvent) => {
+        const newState = [...players].filter((p) => p !== data.username);
+        toast(`Player ${data.username} has left.`);
+        setPlayers([...newState]);
+      });
     }
   }, [gameId, pusher]);
 
@@ -107,9 +121,9 @@ export default function Create() {
 
   return (
     <Suspense>
-      <PageLayout isPusherActive={pusher !== null}>
+      <PageLayout isPusherActive={pusher !== null} className="bg-[#191733]">
         <div className="flex items-center justify-center gap-2 align-middle">
-          <h1 className="m-0 text-primary-content">
+          <h1 className="m-0 mb-4 text-primary-content">
             {gameId ? `#${gameId}` : "Create Game"}
           </h1>
           {gameId && <Indicator variant={isOnline ? "online" : "offline"} />}
@@ -126,24 +140,35 @@ export default function Create() {
           </Button>
         )}
 
-        {/* Player Count */}
+        {/* Player Count and Players */}
         {channel && (
-          <div className="flex items-center justify-center gap-4">
-            {channelInfoMutation.isPending ? (
-              <p>Reloading Player Count...</p>
-            ) : (
-              <>
-                <p>Players in Game: {Math.max(playerCount - 1, 0)}</p>
-                <Button
-                  onClick={() => {
-                    getPlayerCount();
-                  }}
-                >
-                  <IoReload />
-                </Button>
-              </>
-            )}
-          </div>
+          <>
+            <div className="flex items-center justify-center gap-4 text-xs">
+              {channelInfoMutation.isPending ? (
+                <p>Reloading Player Count...</p>
+              ) : (
+                <>
+                  <p>Players in Game: {Math.max(playerCount - 1, 0)}</p>
+                  <Button
+                    onClick={() => {
+                      getPlayerCount();
+                    }}
+                    variant="link"
+                  >
+                    <IoReload />
+                  </Button>
+                </>
+              )}
+            </div>
+            <div className="mb-4">
+              <h3 className="mt-2 text-white">Joined Players</h3>
+              {players.length > 0 ? (
+                players.map((player) => <Badge key={player}>{player}</Badge>)
+              ) : (
+                <p>No players have joined yet.</p>
+              )}
+            </div>
+          </>
         )}
 
         <DataTable columns={columns} data={data} />

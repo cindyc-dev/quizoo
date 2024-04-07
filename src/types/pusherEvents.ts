@@ -1,4 +1,4 @@
-export interface PlayerJoinedEvent {
+export interface PlayerJoinLeaveEvent {
   username: string;
   time: Date;
 }

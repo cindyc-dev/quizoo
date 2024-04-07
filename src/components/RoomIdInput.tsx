@@ -7,7 +7,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { FaArrowRightToBracket } from "react-icons/fa6";
 import { Button } from "~/components/ui/button";
-import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 
 const formSchema = z.object({
@@ -46,6 +52,8 @@ export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
     if (existingUsername) {
       form.setValue("username", existingUsername);
     }
+    // Manually trigger form validation to activate Join button
+    void form.trigger();
   }, []);
 
   return (
@@ -56,8 +64,9 @@ export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
           name="username"
           render={({ field }) => (
             <FormItem>
+              <FormLabel>😇 Username</FormLabel>
               <FormControl>
-                <Input placeholder="😇 Username" {...field} />
+                <Input placeholder="eg. Jane Chen" {...field} />
               </FormControl>
             </FormItem>
           )}
@@ -67,8 +76,9 @@ export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
           name="roomId"
           render={({ field }) => (
             <FormItem>
+              <FormLabel>🏠 Room ID</FormLabel>
               <FormControl>
-                <Input placeholder="🏠 Room ID" {...field} />
+                <Input placeholder="eg.  AQ7HDU" {...field} />
               </FormControl>
             </FormItem>
           )}

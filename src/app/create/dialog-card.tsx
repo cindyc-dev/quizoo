@@ -219,16 +219,16 @@ export default function DialogCard({ card }: DialogCardProps) {
                             }
                           />
                         )}
-                        <Textarea
+                        <Input
                           className="m-0 text-xs"
                           placeholder="Answer option..."
                           value={option}
                           onChange={(e) => {
                             console.log("Changes happenning for textarea");
                           }}
-                          onFocus={() => {
+                          // onFocus={() => {
 
-                          }}
+                          // }}
                           onBlur={(props) => {
                             console.log("onBlur");
                             console.log({ props });
@@ -256,7 +256,7 @@ export default function DialogCard({ card }: DialogCardProps) {
   // TODO display form errors
 
   return (
-    <DialogContent className="max-w-[80%]">
+    <DialogContent className="">
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <GoPencil /> Edit your card
@@ -280,7 +280,7 @@ export default function DialogCard({ card }: DialogCardProps) {
                       <SelectValue placeholder="Card Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {(CARD_TYPE).map((cardType) => (
+                      {CARD_TYPE.map((cardType) => (
                         <SelectItem value={cardType} key={cardType}>
                           {CARD_RENDER[cardType] ?? cardType}
                         </SelectItem>

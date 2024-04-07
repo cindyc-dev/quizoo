@@ -7,12 +7,19 @@ import { toast } from "sonner";
 import PageLayout from "~/components/PageLayout";
 import QuizooLogo from "~/components/QuizooLogo";
 import RoomIdInput from "~/components/RoomIdInput";
+import { api } from "~/trpc/react";
 import { getPusherEnvVars } from "~/utils/pusherClient";
+import { useSearchParams } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
+  const query = useSearchParams();
+  const roomId = query.get("roomId");
   const [pusher, setPusher] = useState<Pusher | null>(null);
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+
+  const leaveMutation = api.sockets.playerLeave.useMutation();
+  const joinMutation = api.sockets.playerJoin.useMutation();
 
   useEffect(() => {
     // Initialise Client Pusher
@@ -24,8 +31,15 @@ export default function Home() {
     setPusher(initializedPusher);
 
     return () => {
-      // Clean Up Pusher instance when component unmounts
+      // TODO #debug - I have to idea if this is running lol; Pusher still disconnects when all of this is commented out; but it does prevent double connections (during development)
+      // Trigger Leave
       if (initializedPusher) {
+        leaveMutation.mutate({
+          username: localStorage.getItem("username")!,
+          gameId: roomId!,
+        });
+
+        // Clean Up Pusher instance when component unmounts
         initializedPusher.unbind_all();
         initializedPusher.disconnect();
       }
@@ -50,9 +64,27 @@ export default function Home() {
 
     const channel = pusher.subscribe(roomId);
     channel.bind("pusher:subscription_succeeded", async () => {
-      toast.success(
-        `Successfully created and connected to ${roomId} as ${username}.`,
+      joinMutation.mutate(
+        {
+          username,
+          gameId: roomId,
+        },
+        {
+          onSuccess: (response) => {
+            console.log({ joinResponse: response });
+            if (response) {
+              toast.success(
+                `Successfully joined and connected to ${roomId} as ${username}.`,
+              );
+            } else {
+              toast.error(
+                `An error occured when trying to join ${roomId} as ${username}.`,
+              );
+            }
+          },
+        },
       );
+
       setIsSubscribed(true);
     });
   };
