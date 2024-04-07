@@ -127,7 +127,7 @@ export default function Create() {
             <p>Reloading Player Count...</p>
           ) : (
             <>
-              <p>Players in Game: {playerCount}</p>
+              <p>Players in Game: {playerCount - 1}</p>
               <Button
                 onClick={() => {
                   getPlayerCount();

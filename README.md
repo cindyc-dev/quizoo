@@ -6,12 +6,13 @@
 2.
 
 ## TODO
+
 - [x] Setup Pusher
 - [x] Host Create Channel
   - [x] Generate Game ID
   - [ ] #later Rejoin/Kill existing Game
   - [x] View Currently Joined Players
-    - [ ] 
+    - [ ]
   - [x] Reload Joined Players
     - [x] HTTP Post Request
     - [ ] #later Automatically Reload every X minutes/seconds
@@ -46,7 +47,7 @@
 - [ ] Timer
 - [ ] Notes
 - [ ] #later Add Music
-- [ ] Player 
+- [ ] Player
 
 ## Counting Messages
 
