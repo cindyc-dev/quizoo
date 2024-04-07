@@ -1,4 +1,4 @@
-import React, { type ReactNode } from "react";
+import React, { Suspense, type ReactNode } from "react";
 import Footer from "./Footer";
 import { cn } from "~/lib/utils";
 import { Toaster } from "./ui/sonner";
@@ -14,18 +14,18 @@ export default function PageLayout({
   children,
   className,
   props,
-  isPusherActive=false,
+  isPusherActive = false,
 }: PageLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-[#191733] to-[#03020D]">
       <div
         className={cn(
-          "text-primary-content container prose m-auto my-4 flex max-w-[80vw] flex-grow flex-col items-center xl:max-w-screen-xl",
+          "container prose m-auto my-4 flex max-w-[80vw] flex-grow flex-col items-center text-primary-content xl:max-w-screen-xl",
           className,
         )}
         {...props}
       >
-        {children}
+        <Suspense>{children}</Suspense>
       </div>
       <Toaster />
       <Footer isPusherActive={isPusherActive} />
