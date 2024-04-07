@@ -10,8 +10,10 @@ import RoomIdInput from "~/components/RoomIdInput";
 import { api } from "~/trpc/react";
 import { getPusherEnvVars } from "~/utils/pusherClient";
 import { useSearchParams } from "next/navigation";
+import { Button } from "~/components/ui/button";
 
 export default function Home() {
+  const [username, setUsername] = useState<string>("");
   const router = useRouter();
   const query = useSearchParams();
   const roomId = query.get("roomId");
@@ -20,6 +22,7 @@ export default function Home() {
 
   const leaveMutation = api.sockets.playerLeave.useMutation();
   const joinMutation = api.sockets.playerJoin.useMutation();
+  const emoteMutation = api.sockets.playerEmote.useMutation();
 
   useEffect(() => {
     // Initialise Client Pusher
@@ -35,7 +38,7 @@ export default function Home() {
       // Trigger Leave
       if (initializedPusher) {
         leaveMutation.mutate({
-          username: localStorage.getItem("username")!,
+          username,
           gameId: roomId!,
         });
 
@@ -87,6 +90,15 @@ export default function Home() {
 
       setIsSubscribed(true);
     });
+    setUsername(username);
+  };
+
+  const handleEmote = (emote: string) => {
+    emoteMutation.mutate({
+      gameId: roomId!,
+      username,
+      emote,
+    });
   };
 
   if (!isSubscribed) {
@@ -103,6 +115,7 @@ export default function Home() {
   return (
     <PageLayout className="justify-center" isPusherActive={pusher !== null}>
       <p>Waiting...</p>
+      <Button onClick={() => handleEmote("😄")}>Send Emote 😄</Button>
     </PageLayout>
   );
 }

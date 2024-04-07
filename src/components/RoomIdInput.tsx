@@ -66,7 +66,7 @@ export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
             <FormItem>
               <FormLabel>😇 Username</FormLabel>
               <FormControl>
-                <Input placeholder="eg. Jane Chen" {...field} />
+                <Input placeholder="eg. Jane Cheah" {...field} />
               </FormControl>
             </FormItem>
           )}

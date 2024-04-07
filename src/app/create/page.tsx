@@ -16,7 +16,10 @@ import { api } from "~/trpc/react";
 import { IoReload } from "react-icons/io5";
 import { DataTable } from "./data-table";
 import { cards } from "./columns";
-import { type PlayerJoinLeaveEvent } from "~/types/pusherEvents";
+import {
+  PlayerEmoteEvent,
+  type PlayerJoinLeaveEvent,
+} from "~/types/pusherEvents";
 import { Badge } from "~/components/ui/badge";
 
 export default function Create() {
@@ -95,6 +98,10 @@ export default function Create() {
         const newState = [...players].filter((p) => p !== data.username);
         toast(`Player ${data.username} has left.`);
         setPlayers([...newState]);
+      });
+
+      channel.bind("emote", (data: PlayerEmoteEvent) => {
+        toast(`${data.username}: ${data.emote}`);
       });
     }
   }, [gameId, pusher]);

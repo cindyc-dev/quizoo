@@ -1,6 +1,9 @@
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
-import { type PlayerJoinLeaveEvent as PlayerJoinLeftEvent } from "~/types/pusherEvents";
+import {
+  type PlayerEmoteEvent,
+  type PlayerJoinLeaveEvent as PlayerJoinLeftEvent,
+} from "~/types/pusherEvents";
 import { pusherServer } from "~/utils/pusherServer";
 import axios from "axios";
 import { env } from "~/env";
@@ -16,7 +19,7 @@ export const socketsRouter = createTRPCRouter({
     .input(
       z.object({
         username: z.string().min(1),
-        gameId: z.string().min(1),
+        gameId: z.string().length(6),
       }),
     )
     .mutation((opts) => {
@@ -36,7 +39,7 @@ export const socketsRouter = createTRPCRouter({
     .input(
       z.object({
         username: z.string().min(1),
-        gameId: z.string().min(1),
+        gameId: z.string().length(6),
       }),
     )
     .mutation((opts) => {
@@ -46,6 +49,22 @@ export const socketsRouter = createTRPCRouter({
         time: new Date(),
       };
       return pusherServer.trigger(gameId, "player-left", leftEvent);
+    }),
+  playerEmote: publicProcedure
+    .input(
+      z.object({
+        emote: z.string().min(1),
+        username: z.string().min(1),
+        gameId: z.string().length(6),
+      }),
+    )
+    .mutation((opts) => {
+      const { emote, username, gameId } = opts.input;
+      const emoteEvent: PlayerEmoteEvent = {
+        username,
+        emote,
+      };
+      return pusherServer.trigger(gameId, "emote", emoteEvent);
     }),
   getChannelInfo: publicProcedure
     .input(
