@@ -1,5 +1,6 @@
 "use client";
 
+import { columns } from "./columns";
 import React, { Suspense, useEffect, useState } from "react";
 import { FaArrowRightToBracket } from "react-icons/fa6";
 import PageLayout from "~/components/PageLayout";
@@ -13,6 +14,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getPusherEnvVars } from "~/utils/pusherClient";
 import { api } from "~/trpc/react";
 import { IoReload } from "react-icons/io5";
+import { DataTable } from "./data-table";
+import { cards } from "./columns";
 
 export default function Create() {
   const query = useSearchParams();
@@ -100,6 +103,8 @@ export default function Create() {
     router.push(`create?gameId=${newGameId}`);
   };
 
+  const data = cards;
+
   return (
     <Suspense>
       <PageLayout isPusherActive={pusher !== null}>
@@ -122,21 +127,27 @@ export default function Create() {
         )}
 
         {/* Player Count */}
-        <div className="flex items-center justify-center gap-4">
-          {channelInfoMutation.isPending ? (
-            <p>Reloading Player Count...</p>
-          ) : (
-            <>
-              <p>Players in Game: {playerCount - 1}</p>
-              <Button
-                onClick={() => {
-                  getPlayerCount();
-                }}
-              >
-                <IoReload />
-              </Button>
-            </>
-          )}
+        {channel && (
+          <div className="flex items-center justify-center gap-4">
+            {channelInfoMutation.isPending ? (
+              <p>Reloading Player Count...</p>
+            ) : (
+              <>
+                <p>Players in Game: {Math.max(playerCount - 1, 0)}</p>
+                <Button
+                  onClick={() => {
+                    getPlayerCount();
+                  }}
+                >
+                  <IoReload />
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+
+        <div className="container mx-auto py-10">
+          <DataTable columns={columns} data={data} />
         </div>
       </PageLayout>
     </Suspense>

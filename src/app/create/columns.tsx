@@ -1,18 +1,49 @@
-type Card = {
+"use client"
+
+import { type ColumnDef } from "@tanstack/react-table";
+
+
+export type Card = {
   id: string;
   type: "MCQ" | "Type" | "Slide";
   text: string;
-  options?: string[];
+  answerOptions?: string[];
   timeLimit?: number;
   correctAnswer?: string[] | number[];
 };
+
+export const columns: ColumnDef<Card>[] = [
+  {
+    accessorKey: "text",
+    header: "Question/Text",
+  },
+  {
+    accessorKey: "answerOptions",
+    header: "Answer Options",
+    cell: ({ row }) => {
+      return (
+        <div>
+
+        </div>
+      )
+    }
+  },
+  {
+    accessorKey: "correctAnswer",
+    header: "Correct Answer"
+  },
+  {
+    accessorKey: "timeLimit",
+    header: "Time Limit"
+  }
+]
 
 export const cards: Card[] = [
   {
     id: "728ed52f",
     type: "MCQ",
     text: "Is it always possible to convert a while loop into a for loop and vise versa?",
-    options: [
+    answerOptions: [
       "Always possible to convert for loop --> while loop",
       "Always possible to convert while loop --> for loop",
       "NOT always possible to convert for loop --> while loop",
@@ -33,7 +64,7 @@ export const cards: Card[] = [
     id: "489e1d42",
     type: "MCQ",
     text: "You cannot index sets because ordinary sets do not preserve the order in which we insert the elements",
-    options: ["True", "False"],
+    answerOptions: ["True", "False"],
     timeLimit: 30,
     correctAnswer: ["True"],
   },
