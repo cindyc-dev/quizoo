@@ -6,9 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
-import { FaSave } from "react-icons/fa";
-
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -18,35 +16,28 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { type Card } from "./columns";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
-import { DialogClose } from "@radix-ui/react-dialog";
+import { Dialog, DialogTrigger } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
+import DialogCard from "./dialog-card";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+interface DataTableProps<TData> {
+  columns: ColumnDef<TData>[];
   data: TData[];
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
+export function DataTable({ columns, data }: DataTableProps<Card>) {
   // TODO make this a searchParam
-  const focusCardId = useState<string | null>(null);
+  const [focusCard, setFocusCard] = useState<Card | null>(null);
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  useEffect(() => {
+    console.log({ focusCard });
+  }, [focusCard]);
 
   return (
     <div className="rounded-md border">
@@ -84,27 +75,22 @@ export function DataTable<TData, TValue>({
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-                <Dialog>
-                  <DialogTrigger>
-                    <TableCell>
-                      <Button type="button">Edit</Button>
-                    </TableCell>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Edit Card</DialogTitle>
-                      <DialogDescription>Edit your card</DialogDescription>
-                    </DialogHeader>
-                    Content
-                    <DialogFooter className="sm:justify-end">
-                      <DialogClose asChild>
-                        <Button type="button" variant="secondary">
-                          Save <FaSave className="ml-2 h-4 w-4" />
-                        </Button>
-                      </DialogClose>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                <TableCell>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          console.log({ rowData: row.original });
+                          setFocusCard({ ...row.original });
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </DialogTrigger>
+                    {focusCard && <DialogCard card={focusCard} />}
+                  </Dialog>
+                </TableCell>
               </TableRow>
             ))
           ) : (

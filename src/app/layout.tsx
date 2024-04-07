@@ -22,9 +22,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body className={`font-sans ${inter.variable}`}>
         <TRPCReactProvider>
+          {/* TODO Investigate cause of "Extra attributes from server" Error - and not really working for dialog component ;-; */}
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
