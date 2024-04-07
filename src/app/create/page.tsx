@@ -121,7 +121,7 @@ export default function Create() {
 
   return (
     <Suspense>
-      <PageLayout isPusherActive={pusher !== null}>
+      <PageLayout isPusherActive={pusher !== null} className="bg-[#191733]">
         <div className="flex items-center justify-center gap-2 align-middle">
           <h1 className="m-0 mb-4 text-primary-content">
             {gameId ? `#${gameId}` : "Create Game"}
