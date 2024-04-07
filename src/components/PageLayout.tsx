@@ -25,7 +25,7 @@ export default function PageLayout({
         )}
         {...props}
       >
-        <Suspense>{children}</Suspense>
+        {children}
       </div>
       <Toaster />
       <Footer isPusherActive={isPusherActive} />
