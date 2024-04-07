@@ -318,7 +318,7 @@ export default function DialogCard({ card }: DialogCardProps) {
 
           {/* Correct Answer */}
           {/* Time Limit */}
-          <FormField
+          {/* <FormField
             control={form.control}
             name="timeLimit"
             render={({ field }) => (
@@ -326,8 +326,8 @@ export default function DialogCard({ card }: DialogCardProps) {
                 <FormLabel>Time Limit</FormLabel>
                 <FormControl>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    onValueChange={(e) => console.log(e)}
+                    defaultValue={`${field.value}`}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Time Limit" />
@@ -341,11 +341,12 @@ export default function DialogCard({ card }: DialogCardProps) {
                       <SelectItem value={180}>180s (3min)</SelectItem>
                     </SelectContent>
                   </Select>
+                  <Input type="number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
 
           <DialogFooter className="sm:justify-end">
             <DialogClose asChild>

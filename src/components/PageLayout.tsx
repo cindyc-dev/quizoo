@@ -7,6 +7,7 @@ interface PageLayoutProps {
   children: ReactNode;
   className?: string;
   props?: object;
+  hasGradient?: boolean;
   isPusherActive?: boolean;
 }
 
