@@ -48,7 +48,7 @@ export const columns: ColumnDef<Card>[] = [
 
 export const cards: Card[] = [
   {
-    id: "728ed52f",
+    id: 0,
     type: "MCQ",
     text: "Is it always possible to convert a while loop into a for loop and vise versa?",
     answerOptions: [
@@ -62,14 +62,14 @@ export const cards: Card[] = [
     correctAnswer: [0, 3],
   },
   {
-    id: "1210jf02",
+    id: 1,
     type: "Type",
     text: "Assume that seq is a list. Write one line of code to sort seq in-place (ie. mutate the list).",
     timeLimit: 60,
     correctAnswer: ["seq.sort()"],
   },
   {
-    id: "489e1d42",
+    id: 2,
     type: "MCQ",
     text: "You cannot index sets because ordinary sets do not preserve the order in which we insert the elements",
     answerOptions: ["True", "False"],
