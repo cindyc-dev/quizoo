@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { FaArrowRightToBracket } from "react-icons/fa6";
+import { LogIn } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -52,8 +52,11 @@ export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
     if (existingUsername) {
       form.setValue("username", existingUsername);
     }
-    // Manually trigger form validation to activate Join button
-    void form.trigger();
+
+    if (roomId && existingUsername) {
+      // Manually trigger form validation to activate Join button on refresh
+      void form.trigger();
+    }
   }, []);
 
   return (
@@ -91,7 +94,7 @@ export default function RoomIdInput({ handleSubmit }: RoomIdInputInterface) {
           disabled={!form.formState.isValid}
         >
           Join
-          <FaArrowRightToBracket />
+          <LogIn />
         </Button>
       </form>
     </Form>

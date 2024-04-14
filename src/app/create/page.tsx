@@ -2,7 +2,7 @@
 
 import { columns } from "./columns";
 import React, { Suspense, useEffect, useState } from "react";
-import { FaArrowRightToBracket } from "react-icons/fa6";
+import { RefreshCcw, LogIn } from "lucide-react";
 import PageLayout from "~/components/PageLayout";
 import { Button } from "~/components/ui/button";
 import { Indicator } from "~/components/ui/indicator";
@@ -13,14 +13,17 @@ import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getPusherEnvVars } from "~/utils/pusherClient";
 import { api } from "~/trpc/react";
-import { IoReload } from "react-icons/io5";
-import { DataTable } from "./data-table";
-import { cards } from "./columns";
 import {
-  PlayerEmoteEvent,
+  type PlayerEmoteEvent,
   type PlayerJoinLeaveEvent,
 } from "~/types/pusherEvents";
 import { Badge } from "~/components/ui/badge";
+import { PlusCircle } from "lucide-react";
+import SidebarCardEdit from "./sidebar-card-edit";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "./db";
+import { DataTable } from "./data-table";
+import { Sheet, SheetTrigger } from "~/components/ui/sheet";
 
 export default function Create() {
   const query = useSearchParams();
@@ -33,6 +36,13 @@ export default function Create() {
   const [channel, setChannel] = useState<PusherTypes.Channel | null>(null);
   const [playerCount, setPlayerCount] = useState<number>(0);
   const [players, setPlayers] = useState<string[]>([]);
+
+  const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
+
+  // Load cards from Dexie
+  const data = useLiveQuery(() => db.cards.toArray());
+
+  console.log({ data });
 
   useEffect(() => {
     // Initialise Client Pusher
@@ -104,7 +114,7 @@ export default function Create() {
         toast(`${data.username}: ${data.emote}`);
       });
     }
-  }, [gameId, pusher]);
+  }, [gameId, players, pusher]);
 
   if (!pusher) {
     return (
@@ -124,8 +134,6 @@ export default function Create() {
     router.push(`create?gameId=${newGameId}`);
   };
 
-  const data = cards;
-
   return (
     <Suspense>
       <PageLayout isPusherActive={pusher !== null} className="bg-[#191733]">
@@ -143,7 +151,7 @@ export default function Create() {
             onClick={handleCreate}
           >
             Create Game
-            <FaArrowRightToBracket />
+            <LogIn />
           </Button>
         )}
 
@@ -162,12 +170,12 @@ export default function Create() {
                     }}
                     variant="link"
                   >
-                    <IoReload />
+                    <RefreshCcw />
                   </Button>
                 </>
               )}
             </div>
-            <div className="mb-4">
+            <div className="">
               <h3 className="mt-2 text-white">Joined Players</h3>
               {players.length > 0 ? (
                 players.map((player) => <Badge key={player}>{player}</Badge>)
@@ -177,8 +185,22 @@ export default function Create() {
             </div>
           </>
         )}
-
-        <DataTable columns={columns} data={data} />
+        <div className="my-4 w-full">
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <Button type="button" size="sm" className="">
+                <PlusCircle className="" />
+                <span>Add Card</span>
+              </Button>
+            </SheetTrigger>
+            <SidebarCardEdit handleClose={() => setIsSheetOpen(false)} />
+          </Sheet>
+        </div>
+        {data?.length ? (
+          <DataTable columns={columns} data={data} />
+        ) : (
+          <span>No Cards :(</span>
+        )}
       </PageLayout>
     </Suspense>
   );

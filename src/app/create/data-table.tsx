@@ -15,10 +15,10 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { type Card } from "./columns";
-import { Dialog, DialogTrigger } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import DialogCard from "./dialog-card";
+import SidebarCardEdit from "./sidebar-card-edit";
+import { type Card } from "~/types/cards";
+import { Sheet, SheetTrigger } from "~/components/ui/sheet";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -27,7 +27,7 @@ interface DataTableProps<TData> {
 
 export function DataTable({ columns, data }: DataTableProps<Card>) {
   // TODO make this a searchParam
-  const [focusCard, setFocusCard] = useState<Card | null>(null);
+  const [focusCard, setFocusCard] = useState<Card | undefined>();
 
   const table = useReactTable({
     data,
@@ -40,7 +40,7 @@ export function DataTable({ columns, data }: DataTableProps<Card>) {
   }, [focusCard]);
 
   return (
-    <div className="rounded-md border">
+    <div className="max-w-[90vw] rounded-md border">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -76,20 +76,28 @@ export function DataTable({ columns, data }: DataTableProps<Card>) {
                   </TableCell>
                 ))}
                 <TableCell>
-                  <Dialog>
-                    <DialogTrigger asChild>
+                  <Sheet
+                    open={
+                      focusCard !== undefined &&
+                      focusCard.id === row.original.id
+                    }
+                    onOpenChange={(open) => !open && setFocusCard(undefined)}
+                  >
+                    <SheetTrigger asChild>
                       <Button
                         type="button"
                         onClick={() => {
-                          console.log({ rowData: row.original });
                           setFocusCard({ ...row.original });
                         }}
                       >
                         Edit
                       </Button>
-                    </DialogTrigger>
-                    {focusCard && <DialogCard card={focusCard} />}
-                  </Dialog>
+                    </SheetTrigger>
+                    <SidebarCardEdit
+                      card={focusCard}
+                      handleClose={() => setFocusCard(undefined)}
+                    />
+                  </Sheet>
                 </TableCell>
               </TableRow>
             ))

@@ -1,17 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogClose,
-  DialogTitle,
-} from "~/components/ui/dialog";
-import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,30 +17,34 @@ import {
 } from "~/components/ui/select";
 
 import { Input } from "~/components/ui/input";
-import { GoPencil } from "react-icons/go";
+import { Pencil, Save, Trash2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { FaSave } from "react-icons/fa";
 import { z } from "zod";
-import {
-  type Card,
-  ZodCardTypeEnum,
-  MUST_HAVE_ANSWER_CARD_TYPES,
-  CARD_TYPE,
-  CARD_RENDER,
-  CardType,
-} from "./columns";
 import { useForm } from "react-hook-form";
 import { Textarea } from "~/components/ui/textarea";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { Checkbox } from "~/components/ui/checkbox";
-import { FaTrash } from "react-icons/fa6";
+import {
+  ZodCardTypeEnum,
+  MUST_HAVE_ANSWER_CARD_TYPES,
+  type Card,
+  CARD_TYPE,
+  DEFAULT_CARD,
+} from "~/types/cards";
+import { CARD_RENDER } from "./columns";
+import { db } from "./db";
+import { SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet";
+import { Separator } from "~/components/ui/separator";
 
 const formSchema = z.object({
+  id: z.optional(z.number()),
   type: ZodCardTypeEnum,
   text: z.string().min(0),
-  answerOptions: z.array(z.string()),
-  timeLimit: z.number(),
-  correctAnswer: z.union([z.array(z.string()), z.array(z.number())]),
+  answerOptions: z.optional(z.array(z.string())),
+  timeLimit: z.optional(z.number()),
+  correctAnswer: z.optional(
+    z.union([z.array(z.string()), z.array(z.number())]),
+  ),
 });
 
 type ResolverReturnType = {
@@ -106,34 +101,36 @@ const useCustomResolver = () =>
     [],
   );
 
-interface DialogCardProps {
-  card: Card;
+interface SidebarCardEditProps {
+  card?: Card;
+  handleClose: () => void;
 }
 
-export default function DialogCard({ card }: DialogCardProps) {
+export default function SidebarCardEdit({
+  card = DEFAULT_CARD,
+  handleClose,
+}: SidebarCardEditProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: useCustomResolver(),
-    defaultValues: {
-      type: card.type,
-      text: card.text,
-      answerOptions: card.answerOptions,
-      timeLimit: card.timeLimit,
-      correctAnswer: card.correctAnswer,
-    },
+    defaultValues: card,
   });
 
   useEffect(() => {
     // TODO #code-cleanup - set it more effeciently
-    form.setValue("type", card.type);
-    form.setValue("text", card.text);
-    form.setValue("answerOptions", card.answerOptions ?? []);
-    form.setValue("timeLimit", card.timeLimit ?? 0);
-    form.setValue("correctAnswer", card.correctAnswer ?? []);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [card]);
+    form.reset(card);
+  }, [card, form]);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      // Add new card to to Dexie
+      const id = await db.cards.put(values);
+      console.log(`Added card with id: ${id}`);
+    } catch (error) {
+      console.error(error);
+    }
+
     console.log({ values });
+    handleClose();
   };
 
   const correctAnswer = form.watch("correctAnswer");
@@ -144,10 +141,10 @@ export default function DialogCard({ card }: DialogCardProps) {
   useEffect(() => {
     if (
       (cardType === "MCQ" &&
-        correctAnswer.length &&
-        typeof correctAnswer[0] !== "number") ||
+        correctAnswer?.length &&
+        typeof correctAnswer[0] !== "number") ??
       (cardType === "Type" &&
-        correctAnswer.length &&
+        correctAnswer?.length &&
         typeof correctAnswer[0] !== "string")
     ) {
       form.setValue("correctAnswer", []);
@@ -155,10 +152,16 @@ export default function DialogCard({ card }: DialogCardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardType]);
 
-  const AnswerOptions = () => {
-    // Used to determine if an option has been focused on
-    const [focusedOptionOriValue, setEditOptionValue] = useState("");
+  const handleDelete = async () => {
+    try {
+      await db.cards.delete(form.getValues("id"));
+    } catch (e) {
+      console.error(e);
+    }
+    handleClose();
+  };
 
+  const AnswerOptions = () => {
     const handleDeleteOption = (index: number) => {
       // Update answer indexes
       const newCorrectAnswer: number[] = [];
@@ -171,7 +174,7 @@ export default function DialogCard({ card }: DialogCardProps) {
       });
       form.setValue("correctAnswer", newCorrectAnswer);
       const newAnswerOptions = answerOptions;
-      newAnswerOptions.splice(index, 1);
+      newAnswerOptions?.splice(index, 1);
       form.setValue("answerOptions", newAnswerOptions);
     };
 
@@ -203,7 +206,7 @@ export default function DialogCard({ card }: DialogCardProps) {
 
             <FormControl>
               <div className="flex flex-col gap-2">
-                {field.value.map((option, index) => {
+                {field.value?.map((option, index) => {
                   const isAnswer = (correctAnswer as number[]).includes(index);
                   return (
                     <div
@@ -240,7 +243,7 @@ export default function DialogCard({ card }: DialogCardProps) {
                         className="m-0 h-fit p-0"
                         onClick={() => handleDeleteOption(index)}
                       >
-                        <FaTrash className="h-4 w-4 text-red-400 transition-transform duration-100 hover:scale-x-125 hover:cursor-pointer active:scale-x-110" />
+                        <Trash2 className="h-4 w-4 text-red-400 transition-transform duration-100 hover:scale-x-125 hover:cursor-pointer active:scale-x-110" />
                       </Button>
                     </div>
                   );
@@ -256,12 +259,13 @@ export default function DialogCard({ card }: DialogCardProps) {
   // TODO display form errors
 
   return (
-    <DialogContent className="">
-      <DialogHeader>
-        <DialogTitle className="flex items-center gap-2">
-          <GoPencil /> Edit your card
-        </DialogTitle>
-      </DialogHeader>
+    <SheetContent>
+      <SheetHeader>
+        <SheetTitle className="flex items-center gap-2">
+          <Pencil /> {card.id ? "Edit card" : "Create card"}
+        </SheetTitle>
+      </SheetHeader>
+      <Separator orientation="horizontal" className="my-4" />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
           {/* Card Type */}
@@ -348,15 +352,24 @@ export default function DialogCard({ card }: DialogCardProps) {
             )}
           /> */}
 
-          <DialogFooter className="sm:justify-end">
-            <DialogClose asChild>
-              <Button type="submit" className="mt-2 bg-slate-50 text-slate-900">
-                Save <FaSave className="ml-2 h-4 w-4" />
+          <div className="flex w-full justify-end gap-2">
+            {form.getValues("id") && (
+              <Button
+                type="button"
+                variant="destructive"
+                className="mt-2 flex align-middle"
+                onClick={handleDelete}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
               </Button>
-            </DialogClose>
-          </DialogFooter>
+            )}
+            <Button type="submit" className="mt-2 flex align-middle">
+              <Save className="mr-2 h-4 w-4" />
+              Save
+            </Button>
+          </div>
         </form>
       </Form>
-    </DialogContent>
+    </SheetContent>
   );
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import Dexie, { type Table } from "dexie";
-import { type Card } from "./columns";
+import { type Card } from "~/types/cards";
 
 export class MySubClassedDexie extends Dexie {
   cards!: Table<Card>;
